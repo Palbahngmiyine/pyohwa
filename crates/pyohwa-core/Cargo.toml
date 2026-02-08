@@ -22,7 +22,7 @@ serde_json = { workspace = true }
 thiserror = { workspace = true }
 sha2 = "0.10"
 walkdir = "2"
-pyohwa-search = { version = "0.1.0", path = "../pyohwa-search" }
+pyohwa-search = { version = "0.1.1", path = "../pyohwa-search" }
 
 [dev-dependencies]
 tempfile = "3"
