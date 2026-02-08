@@ -19,7 +19,7 @@ Zero-config static site generator powered by Rust and Elm.
 
 ```bash
 # Install
-cargo install --path crates/pyohwa-cli
+cargo install pyohwa-cli
 
 # Create a new project and start the dev server
 pyohwa init my-docs
