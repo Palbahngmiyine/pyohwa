@@ -5,3 +5,12 @@ edition = "2021"
 
 [dependencies]
 pyohwa-core = { path = "../pyohwa-core" }
+axum = { version = "0.8", features = ["ws"] }
+tokio = { workspace = true }
+tower-http = { version = "0.6", features = ["fs"] }
+notify = "7"
+notify-debouncer-mini = "0.5"
+futures = "0.3"
+thiserror = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }

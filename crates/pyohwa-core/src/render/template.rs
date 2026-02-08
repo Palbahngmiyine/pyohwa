@@ -236,6 +236,44 @@ fn escape_html(s: &str) -> String {
         .replace('"', "&quot;")
 }
 
+/// Render a page with live reload script injected before `</body>`.
+/// Used by the dev server to enable automatic browser refresh.
+pub fn render_page_with_live_reload(
+    page: &Page,
+    site_graph: &SiteGraph,
+    config: &Config,
+    ws_port: u16,
+) -> Result<String, RenderError> {
+    let html = render_page(page, site_graph, config)?;
+    let script = live_reload_client_js(ws_port);
+    Ok(html.replace("</body>", &format!("{script}\n</body>")))
+}
+
+/// Generate the live reload client JavaScript.
+/// Connects to the dev server WebSocket and reloads on "reload" message.
+pub fn live_reload_client_js(port: u16) -> String {
+    format!(
+        r#"<script>
+(function() {{
+    var ws;
+    function connect() {{
+        ws = new WebSocket('ws://localhost:{port}/__pyohwa_ws');
+        ws.onmessage = function(e) {{
+            if (e.data === 'reload') {{ location.reload(); }}
+        }};
+        ws.onclose = function() {{
+            setTimeout(function() {{
+                connect();
+            }}, 1000);
+        }};
+    }}
+    connect();
+}})();
+</script>"#,
+        port = port
+    )
+}
+
 /// Write embedded assets (Elm JS, CSS) to the output directory
 pub fn write_embedded_assets(output_dir: &std::path::Path) -> Result<(), crate::error::BuildError> {
     let assets_dir = output_dir.join("assets");
@@ -339,5 +377,34 @@ mod tests {
             escape_html("<script>alert('xss')</script>"),
             "&lt;script&gt;alert('xss')&lt;/script&gt;"
         );
+    }
+
+    #[test]
+    fn test_live_reload_script_injected() {
+        let page = make_test_page();
+        let graph = make_test_graph();
+        let config = Config::default();
+
+        let html = render_page_with_live_reload(&page, &graph, &config, 3000).unwrap();
+        assert!(html.contains("__pyohwa_ws"));
+        assert!(html.contains("WebSocket"));
+    }
+
+    #[test]
+    fn test_live_reload_script_before_body_close() {
+        let page = make_test_page();
+        let graph = make_test_graph();
+        let config = Config::default();
+
+        let html = render_page_with_live_reload(&page, &graph, &config, 3000).unwrap();
+        let ws_pos = html.find("__pyohwa_ws").unwrap();
+        let body_pos = html.find("</body>").unwrap();
+        assert!(ws_pos < body_pos);
+    }
+
+    #[test]
+    fn test_live_reload_port_substitution() {
+        let js = live_reload_client_js(4567);
+        assert!(js.contains("localhost:4567"));
     }
 }

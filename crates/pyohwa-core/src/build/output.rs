@@ -5,6 +5,30 @@ use crate::error::BuildError;
 use crate::render::embedded;
 use crate::site::route::Route;
 
+/// Write rendered HTML files and embedded assets to the output directory
+/// without cleaning the directory first. Used for incremental dev builds.
+pub fn write_output_incremental(
+    pages: &[(Route, String)],
+    output_dir: &Path,
+) -> Result<(), BuildError> {
+    fs::create_dir_all(output_dir)?;
+
+    for (route, html) in pages {
+        let output_path = output_dir.join(&route.output);
+        if let Some(parent) = output_path.parent() {
+            fs::create_dir_all(parent)?;
+        }
+        fs::write(&output_path, html)?;
+    }
+
+    let assets_dir = output_dir.join("assets");
+    fs::create_dir_all(&assets_dir)?;
+    fs::write(assets_dir.join("elm.min.js"), embedded::ELM_JS)?;
+    fs::write(assets_dir.join("theme.css"), embedded::THEME_CSS)?;
+
+    Ok(())
+}
+
 /// Write rendered HTML files and embedded assets to the output directory.
 ///
 /// 1. Clean and recreate the output directory

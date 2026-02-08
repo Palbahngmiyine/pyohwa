@@ -23,6 +23,9 @@ Thumbs.db
 
 # themes/default/dist/ is tracked (pre-built CSS fallback for users without Tailwind CLI)
 
+# Pyohwa
+.pyohwa/
+
 # Environment
 .env
 .env.local
