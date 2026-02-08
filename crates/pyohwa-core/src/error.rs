@@ -56,4 +56,7 @@ pub enum BuildError {
 
     #[error("io error: {0}")]
     Io(#[from] std::io::Error),
+
+    #[error("search error: {0}")]
+    Search(String),
 }

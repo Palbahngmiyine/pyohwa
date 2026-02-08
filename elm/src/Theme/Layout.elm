@@ -5,6 +5,7 @@ import Html.Attributes exposing (class, id, property)
 import Json.Encode as Encode
 import Model exposing (Model)
 import Msg exposing (Msg)
+import Search.Modal as SearchModal
 import Theme.Footer as Footer
 import Theme.Navbar as Navbar
 import Theme.Sidebar as Sidebar
@@ -16,6 +17,7 @@ view model =
     div [ class "pyohwa-layout" ]
         [ Navbar.view model
         , viewBody model
+        , SearchModal.view model
         ]
 
 

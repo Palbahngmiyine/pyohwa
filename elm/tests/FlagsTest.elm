@@ -143,4 +143,41 @@ suite =
 
                     Err err ->
                         Expect.fail (Decode.errorToString err)
+        , test "decodes search enabled setting" <|
+            \_ ->
+                let
+                    json =
+                        """
+                        {
+                            "page": {"title": "T", "description": "", "content": "", "toc": [], "layout": "doc", "frontmatter": {}},
+                            "site": {"title": "S", "description": "", "base": "/", "nav": [], "sidebar": []},
+                            "theme": {"highlightTheme": "x"},
+                            "search": {"enabled": false}
+                        }
+                        """
+                in
+                case Decode.decodeString Flags.decoder json of
+                    Ok flags ->
+                        Expect.equal False flags.search.enabled
+
+                    Err err ->
+                        Expect.fail (Decode.errorToString err)
+        , test "search defaults to enabled when missing" <|
+            \_ ->
+                let
+                    json =
+                        """
+                        {
+                            "page": {"title": "T", "description": "", "content": "", "toc": [], "layout": "doc", "frontmatter": {}},
+                            "site": {"title": "S", "description": "", "base": "/", "nav": [], "sidebar": []},
+                            "theme": {"highlightTheme": "x"}
+                        }
+                        """
+                in
+                case Decode.decodeString Flags.decoder json of
+                    Ok flags ->
+                        Expect.equal True flags.search.enabled
+
+                    Err err ->
+                        Expect.fail (Decode.errorToString err)
         ]

@@ -15,6 +15,7 @@ view model =
             , a [ class "pyohwa-navbar-title", href model.siteBase ]
                 [ text model.siteTitle ]
             , viewNavLinks model.nav
+            , viewSearchButton model.searchEnabled
             ]
         ]
 
@@ -45,3 +46,18 @@ viewNavLink item =
         , href item.link
         ]
         [ text item.text ]
+
+
+viewSearchButton : Bool -> Html Msg
+viewSearchButton enabled =
+    if enabled then
+        button
+            [ class "pyohwa-navbar-search"
+            , onClick OpenSearch
+            ]
+            [ span [ class "pyohwa-navbar-search-text" ] [ text "Search" ]
+            , span [ class "pyohwa-navbar-search-kbd" ] [ text "Ctrl+K" ]
+            ]
+
+    else
+        text ""

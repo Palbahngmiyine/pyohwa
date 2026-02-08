@@ -1,6 +1,7 @@
 module Main exposing (main)
 
 import Browser
+import Browser.Events
 import Flags exposing (PrevNextLink)
 import Html exposing (Html)
 import Json.Decode as Decode exposing (Decoder, Value)
@@ -38,7 +39,28 @@ view model =
 
 subscriptions : Model -> Sub Msg
 subscriptions _ =
-    Ports.onScroll OnScroll
+    Sub.batch
+        [ Ports.onScroll OnScroll
+        , Browser.Events.onKeyDown keyDecoder
+        ]
+
+
+keyDecoder : Decoder Msg
+keyDecoder =
+    Decode.map3
+        (\key ctrlKey metaKey ->
+            if (ctrlKey || metaKey) && key == "k" then
+                OpenSearch
+
+            else if key == "Escape" then
+                OnKeyDown "Escape"
+
+            else
+                NoOp
+        )
+        (Decode.field "key" Decode.string)
+        (Decode.field "ctrlKey" Decode.bool)
+        (Decode.field "metaKey" Decode.bool)
 
 
 

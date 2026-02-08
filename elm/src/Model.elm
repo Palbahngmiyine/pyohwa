@@ -1,6 +1,7 @@
 module Model exposing (Model, NavItemModel, SidebarGroupModel, SidebarItemModel, TocItemModel, fallback, fromFlags)
 
 import Flags exposing (Flags, PrevNextLink)
+import Search.Search exposing (SearchResult, SearchState(..))
 
 
 type alias Model =
@@ -19,6 +20,11 @@ type alias Model =
     , next : Maybe PrevNextLink
     , sidebarOpen : Bool
     , activeTocId : String
+    , searchOpen : Bool
+    , searchQuery : String
+    , searchResults : List SearchResult
+    , searchIndex : SearchState
+    , searchEnabled : Bool
     }
 
 
@@ -97,6 +103,11 @@ fromFlags flags prev next =
     , next = next
     , sidebarOpen = False
     , activeTocId = ""
+    , searchOpen = False
+    , searchQuery = ""
+    , searchResults = []
+    , searchIndex = Idle
+    , searchEnabled = flags.search.enabled
     }
 
 
@@ -117,4 +128,9 @@ fallback =
     , next = Nothing
     , sidebarOpen = False
     , activeTocId = ""
+    , searchOpen = False
+    , searchQuery = ""
+    , searchResults = []
+    , searchIndex = Idle
+    , searchEnabled = True
     }

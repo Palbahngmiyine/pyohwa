@@ -32,6 +32,9 @@ pub fn render_page(
 
     let pyohwa_data = build_pyohwa_data(page, site_graph, config)?;
 
+    let base = normalize_base_url(&config.site.base_url);
+    let og_tags = build_og_tags(page, config, &page_title, description);
+
     let html = format!(
         r#"<!DOCTYPE html>
 <html lang="{lang}">
@@ -40,6 +43,7 @@ pub fn render_page(
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{title}</title>
     <meta name="description" content="{description}">
+{og_tags}
     <link rel="stylesheet" href="{base}assets/theme.css">
 </head>
 <body class="bg-white text-gray-900 dark:bg-gray-950 dark:text-gray-100">
@@ -84,7 +88,8 @@ pub fn render_page(
         lang = config.site.language,
         title = escape_html(&page_title),
         description = escape_html(description),
-        base = normalize_base_url(&config.site.base_url),
+        base = base,
+        og_tags = og_tags,
         body_content = body_content,
         pyohwa_data = pyohwa_data,
     );
@@ -201,6 +206,10 @@ fn build_pyohwa_data(
         }
     });
 
+    data["search"] = json!({
+        "enabled": config.search.enabled,
+    });
+
     if let Some(prev) = prev_link {
         data["prev"] = prev;
     }
@@ -227,6 +236,36 @@ fn find_page_title(site_graph: &SiteGraph, path: &str) -> Option<String> {
         .iter()
         .find(|p| p.route.path() == path)
         .map(|p| p.frontmatter.title.clone())
+}
+
+fn build_og_tags(page: &Page, config: &Config, page_title: &str, description: &str) -> String {
+    let base = normalize_base_url(&config.site.base_url);
+    let page_url = format!("{}{}", base.trim_end_matches('/'), page.route.path());
+    let escaped_title = escape_html(page_title);
+    let escaped_desc = escape_html(description);
+
+    let mut tags = format!(
+        r#"    <meta property="og:title" content="{escaped_title}">
+    <meta property="og:description" content="{escaped_desc}">
+    <meta property="og:type" content="article">
+    <meta property="og:url" content="{page_url}">
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:title" content="{escaped_title}">
+    <meta name="twitter:description" content="{escaped_desc}">"#
+    );
+
+    if let Some(ref og_image) = config.seo.og_image {
+        let escaped_image = escape_html(og_image);
+        tags.push_str(&format!(
+            "\n    <meta property=\"og:image\" content=\"{escaped_image}\">\n    <meta name=\"twitter:image\" content=\"{escaped_image}\">"
+        ));
+    }
+
+    tags.push_str(&format!(
+        "\n    <link rel=\"canonical\" href=\"{page_url}\">"
+    ));
+
+    tags
 }
 
 fn escape_html(s: &str) -> String {
@@ -406,5 +445,44 @@ mod tests {
     fn test_live_reload_port_substitution() {
         let js = live_reload_client_js(4567);
         assert!(js.contains("localhost:4567"));
+    }
+
+    #[test]
+    fn test_og_tags_present() {
+        let page = make_test_page();
+        let graph = make_test_graph();
+        let config = Config::default();
+
+        let html = render_page(&page, &graph, &config).unwrap();
+        assert!(html.contains("og:title"));
+        assert!(html.contains("og:description"));
+        assert!(html.contains("og:type"));
+        assert!(html.contains("og:url"));
+        assert!(html.contains("twitter:card"));
+        assert!(html.contains("rel=\"canonical\""));
+    }
+
+    #[test]
+    fn test_og_image_included_when_configured() {
+        let page = make_test_page();
+        let graph = make_test_graph();
+        let mut config = Config::default();
+        config.seo.og_image = Some("https://example.com/og.png".to_string());
+
+        let html = render_page(&page, &graph, &config).unwrap();
+        assert!(html.contains("og:image"));
+        assert!(html.contains("twitter:image"));
+        assert!(html.contains("https://example.com/og.png"));
+    }
+
+    #[test]
+    fn test_search_flag_in_pyohwa_data() {
+        let page = make_test_page();
+        let graph = make_test_graph();
+        let config = Config::default();
+
+        let html = render_page(&page, &graph, &config).unwrap();
+        assert!(html.contains("\"search\""));
+        assert!(html.contains("\"enabled\""));
     }
 }

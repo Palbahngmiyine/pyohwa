@@ -1125,6 +1125,7 @@ version = "0.1.0"
 dependencies = [
  "comrak",
  "gray_matter",
+ "pyohwa-search",
  "regex",
  "serde",
  "serde_json",
@@ -1140,7 +1141,10 @@ dependencies = [
 name = "pyohwa-search"
 version = "0.1.0"
 dependencies = [
- "pyohwa-core",
+ "regex",
+ "serde",
+ "serde_json",
+ "thiserror",
 ]
 
 [[package]]

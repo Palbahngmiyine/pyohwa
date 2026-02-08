@@ -1,4 +1,4 @@
-module Flags exposing (Flags, PrevNextLink, decoder, prevNextLinkDecoder)
+module Flags exposing (Flags, PrevNextLink, SearchData, decoder, prevNextLinkDecoder)
 
 import Json.Decode as Decode exposing (Decoder)
 
@@ -7,6 +7,7 @@ type alias Flags =
     { page : PageData
     , site : SiteData
     , theme : ThemeData
+    , search : SearchData
     }
 
 
@@ -60,6 +61,11 @@ type alias ThemeData =
     }
 
 
+type alias SearchData =
+    { enabled : Bool
+    }
+
+
 type alias PrevNextLink =
     { title : String
     , link : String
@@ -72,10 +78,15 @@ type alias PrevNextLink =
 
 decoder : Decoder Flags
 decoder =
-    Decode.map3 Flags
+    Decode.map4 Flags
         (Decode.field "page" pageDecoder)
         (Decode.field "site" siteDecoder)
         (Decode.field "theme" themeDecoder)
+        (Decode.oneOf
+            [ Decode.field "search" searchDecoder
+            , Decode.succeed { enabled = True }
+            ]
+        )
 
 
 pageDecoder : Decoder PageData
@@ -145,6 +156,12 @@ themeDecoder : Decoder ThemeData
 themeDecoder =
     Decode.map ThemeData
         (Decode.field "highlightTheme" Decode.string)
+
+
+searchDecoder : Decoder SearchData
+searchDecoder =
+    Decode.map SearchData
+        (Decode.field "enabled" Decode.bool)
 
 
 prevNextLinkDecoder : Decoder PrevNextLink

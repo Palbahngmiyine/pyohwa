@@ -1,0 +1,66 @@
+/* Search overlay */
+.pyohwa-search-overlay {
+  @apply fixed inset-0 z-50 bg-black/50 flex items-start justify-center pt-[10vh];
+}
+
+/* Search modal */
+.pyohwa-search-modal {
+  @apply bg-white dark:bg-gray-900 rounded-xl shadow-2xl w-full max-w-xl mx-4 overflow-hidden border border-gray-200 dark:border-gray-700;
+}
+
+/* Search input */
+.pyohwa-search-input {
+  @apply w-full px-4 py-3 text-lg bg-transparent border-b border-gray-200 dark:border-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 outline-none;
+}
+
+/* Search results */
+.pyohwa-search-results {
+  @apply max-h-80 overflow-y-auto;
+}
+
+.pyohwa-search-empty {
+  @apply flex items-center justify-center py-8;
+}
+
+.pyohwa-search-hint {
+  @apply text-gray-400 dark:text-gray-500 text-sm;
+}
+
+/* Search result item */
+.pyohwa-search-result {
+  @apply block px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-800 border-b border-gray-100 dark:border-gray-800 no-underline transition-colors;
+}
+
+.pyohwa-search-result:last-child {
+  @apply border-b-0;
+}
+
+.pyohwa-search-result-title {
+  @apply text-sm font-semibold text-gray-900 dark:text-white;
+}
+
+.pyohwa-search-result-desc {
+  @apply text-xs text-gray-500 dark:text-gray-400 mt-0.5 line-clamp-1;
+}
+
+.pyohwa-search-result-context {
+  @apply text-xs text-gray-400 dark:text-gray-500 mt-1 line-clamp-1 font-mono;
+}
+
+/* Search footer */
+.pyohwa-search-footer {
+  @apply flex justify-between px-4 py-2 text-xs text-gray-400 dark:text-gray-500 border-t border-gray-200 dark:border-gray-700;
+}
+
+/* Navbar search button */
+.pyohwa-navbar-search {
+  @apply ml-auto flex items-center gap-2 px-3 py-1.5 text-sm text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600 cursor-pointer transition-colors;
+}
+
+.pyohwa-navbar-search-text {
+  @apply hidden sm:inline;
+}
+
+.pyohwa-navbar-search-kbd {
+  @apply hidden sm:inline text-xs font-mono px-1.5 py-0.5 bg-white dark:bg-gray-700 rounded border border-gray-200 dark:border-gray-600;
+}
