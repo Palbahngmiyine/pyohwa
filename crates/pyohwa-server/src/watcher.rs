@@ -1,5 +1,7 @@
 use std::path::{Path, PathBuf};
-use std::time::Instant;
+use std::sync::atomic::{AtomicBool, Ordering};
+use std::sync::Arc;
+use std::time::{Duration, Instant};
 
 use notify_debouncer_mini::{new_debouncer, DebouncedEventKind};
 use tokio::sync::broadcast;
@@ -13,14 +15,16 @@ const EXCLUDE_DIRS: &[&str] = &["dist", ".pyohwa", "target"];
 
 /// Start watching for file changes. Runs in a blocking thread.
 /// On change, triggers an incremental rebuild and sends a reload signal.
+/// The `shutdown` flag is checked periodically to allow graceful termination.
 pub fn start_watcher(
     project_root: PathBuf,
     ws_port: u16,
     reload_tx: broadcast::Sender<()>,
+    shutdown: Arc<AtomicBool>,
 ) -> Result<(), crate::error::ServerError> {
     let (tx, rx) = std::sync::mpsc::channel();
 
-    let mut debouncer = new_debouncer(std::time::Duration::from_millis(100), tx)
+    let mut debouncer = new_debouncer(Duration::from_millis(100), tx)
         .map_err(|e| crate::error::ServerError::Watcher(e.to_string()))?;
 
     // Watch directories
@@ -47,9 +51,12 @@ pub fn start_watcher(
 
     eprintln!("Watching for changes...");
 
-    for result in rx {
-        match result {
-            Ok(events) => {
+    loop {
+        if shutdown.load(Ordering::Relaxed) {
+            break;
+        }
+        match rx.recv_timeout(Duration::from_millis(200)) {
+            Ok(Ok(events)) => {
                 let has_relevant_change = events.iter().any(|event| {
                     event.kind == DebouncedEventKind::Any
                         && !is_excluded(&event.path, &project_root)
@@ -75,9 +82,11 @@ pub fn start_watcher(
                     }
                 }
             }
-            Err(e) => {
+            Ok(Err(e)) => {
                 eprintln!("Watcher error: {e:?}");
             }
+            Err(std::sync::mpsc::RecvTimeoutError::Timeout) => continue,
+            Err(std::sync::mpsc::RecvTimeoutError::Disconnected) => break,
         }
     }
 

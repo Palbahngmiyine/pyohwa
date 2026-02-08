@@ -15,7 +15,7 @@ name = "pyohwa"
 path = "src/main.rs"
 
 [dependencies]
-pyohwa-core = { version = "0.1.1", path = "../pyohwa-core" }
-pyohwa-server = { version = "0.1.1", path = "../pyohwa-server" }
+pyohwa-core = { version = "0.1.2", path = "../pyohwa-core" }
+pyohwa-server = { version = "0.1.2", path = "../pyohwa-server" }
 clap = { version = "4", features = ["derive"] }
 tokio = { workspace = true }

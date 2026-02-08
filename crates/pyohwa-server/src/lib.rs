@@ -6,6 +6,8 @@ mod watcher;
 pub use error::ServerError;
 
 use std::path::PathBuf;
+use std::sync::atomic::{AtomicBool, Ordering};
+use std::sync::Arc;
 
 use tokio::sync::broadcast;
 
@@ -41,12 +43,17 @@ pub async fn run_dev_server(config: DevServerConfig) -> Result<(), ServerError> 
     // Broadcast channel for reload signals
     let (reload_tx, _) = broadcast::channel::<()>(16);
 
+    // Shutdown flag for the file watcher
+    let shutdown = Arc::new(AtomicBool::new(false));
+    let shutdown_watcher = shutdown.clone();
+
     // Start file watcher in a blocking thread
     let watcher_root = project_root.clone();
     let watcher_tx = reload_tx.clone();
     let ws_port = config.port;
-    tokio::task::spawn_blocking(move || {
-        if let Err(e) = watcher::start_watcher(watcher_root, ws_port, watcher_tx) {
+    let watcher_handle = tokio::task::spawn_blocking(move || {
+        if let Err(e) = watcher::start_watcher(watcher_root, ws_port, watcher_tx, shutdown_watcher)
+        {
             eprintln!("Watcher error: {e}");
         }
     });
@@ -60,6 +67,10 @@ pub async fn run_dev_server(config: DevServerConfig) -> Result<(), ServerError> 
 
     // Start HTTP + WebSocket server (blocks until Ctrl+C)
     server::start_server(&project_root, config.port, reload_tx).await?;
+
+    // Signal the watcher to shut down and wait briefly
+    shutdown.store(true, Ordering::Relaxed);
+    let _ = tokio::time::timeout(std::time::Duration::from_millis(500), watcher_handle).await;
 
     Ok(())
 }
