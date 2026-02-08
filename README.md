@@ -1,4 +1,4 @@
-# Pyohwa
+# Pyohwa(표화/標火)
 
 Zero-config static site generator powered by Rust and Elm.
 
