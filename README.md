@@ -44,7 +44,7 @@ cargo build --release
 ### Using cargo install
 
 ```bash
-cargo install --path crates/pyohwa-cli
+cargo install pyohwa-cli
 ```
 
 ## Usage
