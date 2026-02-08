@@ -1,0 +1,22 @@
+[site]
+title = "My Documentation"
+# description = ""
+# base_url = "/"
+# language = "en"
+
+# [build]
+# content_dir = "content"
+# output_dir = "dist"
+# static_dir = "static"
+
+# [theme]
+# name = "default"
+# highlight_theme = "one-dark"
+# custom_css = "custom.css"
+
+# [[nav]]
+# text = "Guide"
+# link = "/guide/getting-started"
+
+# [sidebar]
+# auto = true

@@ -1,0 +1,24 @@
+/* Markdown rendered content typography */
+.pyohwa-prose {
+  @apply text-base leading-7 text-gray-700 dark:text-gray-300;
+
+  h1 { @apply text-3xl font-bold tracking-tight text-gray-900 dark:text-white mt-8 mb-4; }
+  h2 { @apply text-2xl font-semibold tracking-tight text-gray-900 dark:text-white mt-8 mb-3 border-b border-gray-200 dark:border-gray-800 pb-2; }
+  h3 { @apply text-xl font-semibold text-gray-900 dark:text-white mt-6 mb-2; }
+
+  p  { @apply my-4; }
+  a  { @apply text-primary-600 dark:text-primary-400 hover:underline; }
+
+  code { @apply text-sm bg-gray-100 dark:bg-gray-800 px-1.5 py-0.5 rounded font-mono; }
+  pre  { @apply my-4 rounded-lg overflow-x-auto; }
+  pre code { @apply bg-transparent p-0; }
+
+  table { @apply w-full border-collapse my-4; }
+  th { @apply border border-gray-300 dark:border-gray-700 px-4 py-2 bg-gray-50 dark:bg-gray-800 font-semibold text-left; }
+  td { @apply border border-gray-300 dark:border-gray-700 px-4 py-2; }
+
+  blockquote { @apply border-l-4 border-primary-500 pl-4 my-4 text-gray-600 dark:text-gray-400; }
+  ul { @apply list-disc pl-6 my-4; }
+  ol { @apply list-decimal pl-6 my-4; }
+  li { @apply my-1; }
+}

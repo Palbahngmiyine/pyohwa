@@ -1,0 +1,23 @@
+@import "tailwindcss";
+
+/*
+ * Pyohwa Design Tokens
+ * Tailwind v4 @theme directive for CSS custom properties
+ */
+@theme {
+  --color-primary-50: #eff6ff;
+  --color-primary-100: #dbeafe;
+  --color-primary-500: #3b82f6;
+  --color-primary-600: #2563eb;
+  --color-primary-700: #1d4ed8;
+
+  --width-sidebar: 272px;
+  --width-toc: 224px;
+
+  --width-content-max: 768px;
+
+  --font-family-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-family-mono: "JetBrains Mono", ui-monospace, monospace;
+}
+
+@import "./typography.css";
