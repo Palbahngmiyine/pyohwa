@@ -61,6 +61,13 @@ pub fn render_page(
             node: document.getElementById('app'),
             flags: window.__PYOHWA_DATA__
         }});
+        // Set innerHTML after Elm renders (property "innerHTML" needs a frame)
+        requestAnimationFrame(function() {{
+            var el = document.getElementById('content');
+            if (el && window.__PYOHWA_DATA__ && window.__PYOHWA_DATA__.page) {{
+                el.innerHTML = window.__PYOHWA_DATA__.page.content;
+            }}
+        }});
         if (app.ports) {{
             if (app.ports.scrollToElement) {{
                 app.ports.scrollToElement.subscribe(function(id) {{
@@ -174,15 +181,13 @@ fn build_pyohwa_data(
     };
 
     let prev_link = page.prev.as_ref().and_then(|route| {
-        find_page_title(site_graph, route.path()).map(|title| {
-            json!({ "title": title, "link": route.path() })
-        })
+        find_page_title(site_graph, route.path())
+            .map(|title| json!({ "title": title, "link": route.path() }))
     });
 
     let next_link = page.next.as_ref().and_then(|route| {
-        find_page_title(site_graph, route.path()).map(|title| {
-            json!({ "title": title, "link": route.path() })
-        })
+        find_page_title(site_graph, route.path())
+            .map(|title| json!({ "title": title, "link": route.path() }))
     });
 
     let mut data = json!({
@@ -402,10 +407,7 @@ mod tests {
 
     #[test]
     fn test_build_page_title() {
-        assert_eq!(
-            build_page_title("Intro", "My Docs"),
-            "Intro | My Docs"
-        );
+        assert_eq!(build_page_title("Intro", "My Docs"), "Intro | My Docs");
         assert_eq!(build_page_title("", "My Docs"), "My Docs");
         assert_eq!(build_page_title("Intro", ""), "Intro");
     }

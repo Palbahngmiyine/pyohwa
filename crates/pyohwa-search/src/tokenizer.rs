@@ -65,10 +65,7 @@ mod tests {
 
     #[test]
     fn test_whitespace_normalization() {
-        assert_eq!(
-            strip_html("<p>Hello</p>   <p>World</p>"),
-            "Hello World"
-        );
+        assert_eq!(strip_html("<p>Hello</p>   <p>World</p>"), "Hello World");
     }
 
     #[test]

@@ -18,9 +18,7 @@ pub struct Route {
 /// - `content/index.md` -> `/`
 /// - `content/guide/index.md` -> `/guide/`
 pub fn resolve_route(content_dir: &Path, file_path: &Path) -> Route {
-    let relative = file_path
-        .strip_prefix(content_dir)
-        .unwrap_or(file_path);
+    let relative = file_path.strip_prefix(content_dir).unwrap_or(file_path);
 
     let url_path = build_url_path(relative);
     let output = build_output_path(relative);
@@ -33,10 +31,7 @@ pub fn resolve_route(content_dir: &Path, file_path: &Path) -> Route {
 }
 
 fn build_url_path(relative: &Path) -> String {
-    let stem = relative
-        .file_stem()
-        .and_then(|s| s.to_str())
-        .unwrap_or("");
+    let stem = relative.file_stem().and_then(|s| s.to_str()).unwrap_or("");
 
     let parent = relative.parent().unwrap_or_else(|| Path::new(""));
 
@@ -55,10 +50,7 @@ fn build_url_path(relative: &Path) -> String {
 }
 
 fn build_output_path(relative: &Path) -> PathBuf {
-    let stem = relative
-        .file_stem()
-        .and_then(|s| s.to_str())
-        .unwrap_or("");
+    let stem = relative.file_stem().and_then(|s| s.to_str()).unwrap_or("");
 
     let parent = relative.parent().unwrap_or_else(|| Path::new(""));
 

@@ -36,10 +36,7 @@ pub fn write_output_incremental(
 /// 1. Clean and recreate the output directory
 /// 2. Write each HTML page at its route output path
 /// 3. Extract embedded assets (elm.min.js, theme.css) to dist/assets/
-pub fn write_output(
-    pages: &[(Route, String)],
-    output_dir: &Path,
-) -> Result<(), BuildError> {
+pub fn write_output(pages: &[(Route, String)], output_dir: &Path) -> Result<(), BuildError> {
     // Clean output directory
     if output_dir.exists() {
         fs::remove_dir_all(output_dir)?;
@@ -134,11 +131,7 @@ pub fn generate_atom_feed(pages: &[Page], config: &Config) -> String {
         let title = escape_xml(&page.frontmatter.title);
         let url = format!("{}{}", base, page.route.path());
         let date = page.frontmatter.date.as_deref().unwrap_or("1970-01-01");
-        let desc = page
-            .frontmatter
-            .description
-            .as_deref()
-            .unwrap_or("");
+        let desc = page.frontmatter.description.as_deref().unwrap_or("");
         let escaped_desc_entry = escape_xml(desc);
         xml.push_str(&format!(
             r#"  <entry>

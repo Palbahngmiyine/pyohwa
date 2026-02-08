@@ -51,10 +51,7 @@ fn comrak_options() -> Options<'static> {
 }
 
 /// Walk the AST to extract heading nodes and build TocItem list.
-fn collect_toc<'a>(
-    node: &'a comrak::nodes::AstNode<'a>,
-    toc: &mut Vec<TocItem>,
-) {
+fn collect_toc<'a>(node: &'a comrak::nodes::AstNode<'a>, toc: &mut Vec<TocItem>) {
     let data = node.data.borrow();
     if let NodeValue::Heading(ref heading) = data.value {
         let text = collect_text(node);
@@ -165,9 +162,7 @@ mod tests {
 
     #[test]
     fn gfm_table_support() {
-        let content = make_parsed(
-            "| Foo | Bar |\n|-----|-----|\n| Baz | Bim |",
-        );
+        let content = make_parsed("| Foo | Bar |\n|-----|-----|\n| Baz | Bim |");
         let result = parse_markdown(&content).unwrap();
         assert!(result.html.contains("<table>"));
         assert!(result.html.contains("<td>Baz</td>"));

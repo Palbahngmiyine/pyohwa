@@ -40,10 +40,7 @@ pub async fn start_server(
     Ok(())
 }
 
-async fn ws_handler(
-    ws: WebSocketUpgrade,
-    reload_tx: broadcast::Sender<()>,
-) -> impl IntoResponse {
+async fn ws_handler(ws: WebSocketUpgrade, reload_tx: broadcast::Sender<()>) -> impl IntoResponse {
     ws.on_upgrade(move |socket| handle_ws(socket, reload_tx))
 }
 

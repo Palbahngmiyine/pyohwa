@@ -10,9 +10,7 @@ use crate::error::BuildError;
 ///
 /// Finds `<pre><code class="language-XXX">...</code></pre>` blocks and replaces
 /// the code content with syntect-highlighted HTML using CSS classes.
-pub fn apply_syntax_highlighting(
-    content: &RenderedContent,
-) -> Result<RenderedContent, BuildError> {
+pub fn apply_syntax_highlighting(content: &RenderedContent) -> Result<RenderedContent, BuildError> {
     let highlighted = highlight_code_blocks(&content.html);
     Ok(RenderedContent {
         path: content.path.clone(),
@@ -26,8 +24,7 @@ pub fn apply_syntax_highlighting(
 pub fn generate_css() -> String {
     let ts = ThemeSet::load_defaults();
     let theme = &ts.themes["InspiredGitHub"];
-    syntect::html::css_for_theme_with_class_style(theme, ClassStyle::Spaced)
-        .unwrap_or_default()
+    syntect::html::css_for_theme_with_class_style(theme, ClassStyle::Spaced).unwrap_or_default()
 }
 
 fn highlight_code_blocks(html: &str) -> String {
@@ -148,7 +145,8 @@ mod tests {
 
     #[test]
     fn handles_html_entities_in_code() {
-        let html = r#"<pre><code class="language-rust">let x = 1 &amp;&amp; 2 &lt; 3;</code></pre>"#;
+        let html =
+            r#"<pre><code class="language-rust">let x = 1 &amp;&amp; 2 &lt; 3;</code></pre>"#;
         let content = make_rendered(html);
         let result = apply_syntax_highlighting(&content).unwrap();
         assert!(!result.html.contains("&amp;amp;"));
@@ -162,10 +160,7 @@ mod tests {
 <pre><code class="language-python">x = 1</code></pre>"#;
         let content = make_rendered(html);
         let result = apply_syntax_highlighting(&content).unwrap();
-        assert_eq!(
-            result.html.matches("class=\"highlight\"").count(),
-            2
-        );
+        assert_eq!(result.html.matches("class=\"highlight\"").count(), 2);
     }
 
     #[test]

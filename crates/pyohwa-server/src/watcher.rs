@@ -20,11 +20,8 @@ pub fn start_watcher(
 ) -> Result<(), crate::error::ServerError> {
     let (tx, rx) = std::sync::mpsc::channel();
 
-    let mut debouncer = new_debouncer(
-        std::time::Duration::from_millis(100),
-        tx,
-    )
-    .map_err(|e| crate::error::ServerError::Watcher(e.to_string()))?;
+    let mut debouncer = new_debouncer(std::time::Duration::from_millis(100), tx)
+        .map_err(|e| crate::error::ServerError::Watcher(e.to_string()))?;
 
     // Watch directories
     for dir_name in WATCH_DIRS {
@@ -54,7 +51,8 @@ pub fn start_watcher(
         match result {
             Ok(events) => {
                 let has_relevant_change = events.iter().any(|event| {
-                    event.kind == DebouncedEventKind::Any && !is_excluded(&event.path, &project_root)
+                    event.kind == DebouncedEventKind::Any
+                        && !is_excluded(&event.path, &project_root)
                 });
 
                 if !has_relevant_change {

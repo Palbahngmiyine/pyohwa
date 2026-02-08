@@ -16,11 +16,10 @@ pub fn load(project_root: &Path) -> Result<Config, ConfigError> {
         path: config_path.clone(),
         source: e,
     })?;
-    let config: Config =
-        toml::from_str(&content).map_err(|e| ConfigError::ParseError {
-            path: config_path,
-            reason: e.to_string(),
-        })?;
+    let config: Config = toml::from_str(&content).map_err(|e| ConfigError::ParseError {
+        path: config_path,
+        reason: e.to_string(),
+    })?;
     Ok(config)
 }
 

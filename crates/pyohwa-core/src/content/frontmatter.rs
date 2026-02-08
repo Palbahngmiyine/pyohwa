@@ -16,10 +16,11 @@ pub fn parse_frontmatter(raw: &RawContent) -> Result<ParsedContent, ContentError
 
     let frontmatter = if let Some(data) = parsed.data {
         let raw_fm: RawFrontmatter =
-            data.deserialize().map_err(|e| ContentError::InvalidFrontmatter {
-                path: raw.path.clone(),
-                reason: e.to_string(),
-            })?;
+            data.deserialize()
+                .map_err(|e| ContentError::InvalidFrontmatter {
+                    path: raw.path.clone(),
+                    reason: e.to_string(),
+                })?;
         let fm = raw_fm.into_frontmatter("");
         if fm.title.is_empty() {
             return Err(ContentError::MissingTitle {
@@ -127,16 +128,14 @@ mod tests {
 
     #[test]
     fn parses_valid_frontmatter() {
-        let input = raw(
-            r#"---
+        let input = raw(r#"---
 title: Hello World
 description: A test page
 tags:
   - rust
   - docs
 ---
-Body content here."#,
-        );
+Body content here."#);
         let result = parse_frontmatter(&input).unwrap();
         assert_eq!(result.frontmatter.title, "Hello World");
         assert_eq!(
@@ -151,12 +150,10 @@ Body content here."#,
 
     #[test]
     fn missing_title_returns_error() {
-        let input = raw(
-            r#"---
+        let input = raw(r#"---
 description: No title here
 ---
-Body"#,
-        );
+Body"#);
         let err = parse_frontmatter(&input).unwrap_err();
         assert!(matches!(err, ContentError::MissingTitle { .. }));
     }

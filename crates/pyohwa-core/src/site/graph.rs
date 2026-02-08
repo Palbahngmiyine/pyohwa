@@ -105,9 +105,9 @@ fn auto_generate_sidebar(pages: &[Page]) -> Vec<SidebarGroup> {
             dir_pages.sort_by(|a, b| {
                 let order_a = a.frontmatter.order.unwrap_or(i32::MAX);
                 let order_b = b.frontmatter.order.unwrap_or(i32::MAX);
-                order_a.cmp(&order_b).then_with(|| {
-                    a.frontmatter.title.cmp(&b.frontmatter.title)
-                })
+                order_a
+                    .cmp(&order_b)
+                    .then_with(|| a.frontmatter.title.cmp(&b.frontmatter.title))
             });
 
             let display = dir_display_name(&dir);
@@ -265,28 +265,41 @@ mod tests {
         let config = Config::default();
         let graph = build_graph(&rendered, &config);
 
-        let intro = graph.pages.iter().find(|p| p.frontmatter.title == "Introduction");
+        let intro = graph
+            .pages
+            .iter()
+            .find(|p| p.frontmatter.title == "Introduction");
         let setup = graph.pages.iter().find(|p| p.frontmatter.title == "Setup");
-        let cfg = graph.pages.iter().find(|p| p.frontmatter.title == "Configuration");
+        let cfg = graph
+            .pages
+            .iter()
+            .find(|p| p.frontmatter.title == "Configuration");
 
         assert!(intro.is_some());
         assert!(intro.as_ref().map_or(true, |p| p.prev.is_none()));
         assert_eq!(
-            intro.as_ref().and_then(|p| p.next.as_ref().map(|r| r.path.as_str())),
+            intro
+                .as_ref()
+                .and_then(|p| p.next.as_ref().map(|r| r.path.as_str())),
             Some("/guide/setup")
         );
 
         assert_eq!(
-            setup.as_ref().and_then(|p| p.prev.as_ref().map(|r| r.path.as_str())),
+            setup
+                .as_ref()
+                .and_then(|p| p.prev.as_ref().map(|r| r.path.as_str())),
             Some("/guide/intro")
         );
         assert_eq!(
-            setup.as_ref().and_then(|p| p.next.as_ref().map(|r| r.path.as_str())),
+            setup
+                .as_ref()
+                .and_then(|p| p.next.as_ref().map(|r| r.path.as_str())),
             Some("/guide/config")
         );
 
         assert_eq!(
-            cfg.as_ref().and_then(|p| p.prev.as_ref().map(|r| r.path.as_str())),
+            cfg.as_ref()
+                .and_then(|p| p.prev.as_ref().map(|r| r.path.as_str())),
             Some("/guide/setup")
         );
         assert!(cfg.as_ref().map_or(true, |p| p.next.is_none()));
@@ -294,9 +307,11 @@ mod tests {
 
     #[test]
     fn test_manual_sidebar() {
-        let rendered = vec![
-            make_rendered("content/guide/intro.md", "Introduction", None),
-        ];
+        let rendered = vec![make_rendered(
+            "content/guide/intro.md",
+            "Introduction",
+            None,
+        )];
 
         let mut config = Config::default();
         config.sidebar.auto = false;

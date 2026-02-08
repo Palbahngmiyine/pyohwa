@@ -94,11 +94,7 @@ fn pages_to_search_data(pages: &[Page]) -> Vec<pyohwa_search::PageData> {
         .map(|page| pyohwa_search::PageData {
             url: page.route.path().to_string(),
             title: page.frontmatter.title.clone(),
-            description: page
-                .frontmatter
-                .description
-                .clone()
-                .unwrap_or_default(),
+            description: page.frontmatter.description.clone().unwrap_or_default(),
             html: page.html.clone(),
             tags: page.frontmatter.tags.clone(),
             date: page.frontmatter.date.clone(),
@@ -119,11 +115,7 @@ fn write_search_and_seo(result: &BuildResult) -> Result<(), BuildError> {
     }
 
     // Sitemap
-    crate::build::output::write_sitemap(
-        &result.output_pages,
-        &result.config,
-        &result.output_dir,
-    )?;
+    crate::build::output::write_sitemap(&result.output_pages, &result.config, &result.output_dir)?;
 
     // Atom feed
     crate::build::output::write_atom_feed(
@@ -135,11 +127,102 @@ fn write_search_and_seo(result: &BuildResult) -> Result<(), BuildError> {
     Ok(())
 }
 
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_build_with_subdirectories() {
+        let tmp = tempfile::tempdir().unwrap();
+        let root = tmp.path();
+
+        // Create pyohwa.toml
+        std::fs::write(
+            root.join("pyohwa.toml"),
+            r#"[site]
+title = "Test Site"
+
+[search]
+enabled = true
+"#,
+        )
+        .unwrap();
+
+        // Create content directory with subdirectories
+        std::fs::create_dir_all(root.join("content/guide")).unwrap();
+        std::fs::create_dir_all(root.join("content/api")).unwrap();
+        std::fs::create_dir_all(root.join("static")).unwrap();
+
+        std::fs::write(
+            root.join("content/index.md"),
+            "---\ntitle: \"Home\"\nlayout: home\n---\n# Home\n",
+        )
+        .unwrap();
+
+        std::fs::write(
+            root.join("content/guide/getting-started.md"),
+            "---\ntitle: \"Getting Started\"\norder: 1\n---\n# Getting Started\n\nHello guide.\n",
+        )
+        .unwrap();
+
+        std::fs::write(
+            root.join("content/guide/installation.md"),
+            "---\ntitle: \"Installation\"\norder: 2\n---\n# Installation\n\n```bash\ncargo install pyohwa\n```\n",
+        )
+        .unwrap();
+
+        std::fs::write(
+            root.join("content/api/overview.md"),
+            "---\ntitle: \"API Overview\"\norder: 1\n---\n# API Overview\n",
+        )
+        .unwrap();
+
+        // Run build
+        build(root).unwrap();
+
+        let dist = root.join("dist");
+
+        // Verify all expected output files exist
+        assert!(dist.join("index.html").exists(), "index.html missing");
+        assert!(
+            dist.join("guide/getting-started/index.html").exists(),
+            "guide/getting-started missing"
+        );
+        assert!(
+            dist.join("guide/installation/index.html").exists(),
+            "guide/installation missing"
+        );
+        assert!(
+            dist.join("api/overview/index.html").exists(),
+            "api/overview missing"
+        );
+
+        // Verify search index contains subdirectory paths
+        let search_json = std::fs::read_to_string(dist.join("search-index.json")).unwrap();
+        assert!(
+            search_json.contains("getting-started"),
+            "search index missing getting-started"
+        );
+        assert!(
+            search_json.contains("installation"),
+            "search index missing installation"
+        );
+        assert!(
+            search_json.contains("overview"),
+            "search index missing overview"
+        );
+
+        // Verify HTML contains __PYOHWA_DATA__
+        let html = std::fs::read_to_string(dist.join("guide/getting-started/index.html")).unwrap();
+        assert!(
+            html.contains("__PYOHWA_DATA__"),
+            "HTML missing __PYOHWA_DATA__"
+        );
+    }
+}
+
 /// Internal: run stages 1–7, returning rendered pages and paths.
-fn build_internal(
-    project_root: &Path,
-    ws_port: Option<u16>,
-) -> Result<BuildResult, BuildError> {
+fn build_internal(project_root: &Path, ws_port: Option<u16>) -> Result<BuildResult, BuildError> {
     // Stage 1: Load config
     let config = config::load(project_root)?;
 

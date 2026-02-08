@@ -1,0 +1,15 @@
+[site]
+title = "Pyohwa Example"
+description = "Example documentation site for testing"
+base_url = "/"
+
+[search]
+enabled = true
+
+[[nav]]
+text = "Guide"
+link = "/guide/getting-started"
+
+[[nav]]
+text = "API"
+link = "/api/overview"
