@@ -7,7 +7,7 @@ license.workspace = true
 repository.workspace = true
 homepage.workspace = true
 authors.workspace = true
-keywords = ["static-site-generator", "markdown", "documentation"]
+keywords = ["static-site", "ssg", "markdown", "documentation"]
 categories = ["command-line-utilities", "web-programming"]
 include = ["src/**/*", "build.rs", "Cargo.toml", "pre-built/**/*"]
 

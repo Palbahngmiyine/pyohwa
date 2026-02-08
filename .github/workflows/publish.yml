@@ -18,31 +18,61 @@ jobs:
           cp elm/dist/elm.min.js crates/pyohwa-core/pre-built/elm.min.js
           cp themes/default/dist/theme.css crates/pyohwa-core/pre-built/theme.css
 
+      - name: Verify all crates can be packaged
+        run: |
+          cargo package -p pyohwa-search --allow-dirty
+          cargo package -p pyohwa-core --allow-dirty
+          echo "Packaging verified successfully"
+
       - name: Publish pyohwa-search
-        run: cargo publish -p pyohwa-search
+        run: cargo publish -p pyohwa-search --allow-dirty
         env:
           CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_REGISTRY_TOKEN }}
 
-      - name: Wait for crates.io index update
-        run: sleep 30
+      - name: Wait for pyohwa-search availability
+        run: |
+          for i in $(seq 1 12); do
+            if cargo search pyohwa-search 2>/dev/null | grep -q "pyohwa-search"; then
+              echo "pyohwa-search is available on crates.io"
+              break
+            fi
+            echo "Waiting for crates.io index update... ($i/12)"
+            sleep 10
+          done
 
       - name: Publish pyohwa-core
         run: cargo publish -p pyohwa-core --allow-dirty
         env:
           CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_REGISTRY_TOKEN }}
 
-      - name: Wait for crates.io index update
-        run: sleep 30
+      - name: Wait for pyohwa-core availability
+        run: |
+          for i in $(seq 1 12); do
+            if cargo search pyohwa-core 2>/dev/null | grep -q "pyohwa-core"; then
+              echo "pyohwa-core is available on crates.io"
+              break
+            fi
+            echo "Waiting for crates.io index update... ($i/12)"
+            sleep 10
+          done
 
       - name: Publish pyohwa-server
-        run: cargo publish -p pyohwa-server
+        run: cargo publish -p pyohwa-server --allow-dirty
         env:
           CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_REGISTRY_TOKEN }}
 
-      - name: Wait for crates.io index update
-        run: sleep 30
+      - name: Wait for pyohwa-server availability
+        run: |
+          for i in $(seq 1 12); do
+            if cargo search pyohwa-server 2>/dev/null | grep -q "pyohwa-server"; then
+              echo "pyohwa-server is available on crates.io"
+              break
+            fi
+            echo "Waiting for crates.io index update... ($i/12)"
+            sleep 10
+          done
 
       - name: Publish pyohwa-cli
-        run: cargo publish -p pyohwa-cli
+        run: cargo publish -p pyohwa-cli --allow-dirty
         env:
           CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_REGISTRY_TOKEN }}
