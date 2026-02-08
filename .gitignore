@@ -26,6 +26,9 @@ Thumbs.db
 # Pyohwa
 .pyohwa/
 
+# Pre-built assets for crates.io publishing (generated in CI)
+crates/pyohwa-core/pre-built/
+
 # Environment
 .env
 .env.local

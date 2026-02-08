@@ -1,7 +1,15 @@
 [package]
 name = "pyohwa-core"
-version = "0.1.0"
-edition = "2021"
+description = "Core engine for Pyohwa static site generator — config, markdown, rendering, and build pipeline"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+homepage.workspace = true
+authors.workspace = true
+keywords = ["static-site-generator", "markdown", "documentation"]
+categories = ["command-line-utilities", "web-programming"]
+include = ["src/**/*", "build.rs", "Cargo.toml", "pre-built/**/*"]
 
 [dependencies]
 comrak = "0.36"
@@ -14,7 +22,7 @@ serde_json = { workspace = true }
 thiserror = { workspace = true }
 sha2 = "0.10"
 walkdir = "2"
-pyohwa-search = { path = "../pyohwa-search" }
+pyohwa-search = { version = "0.1.0", path = "../pyohwa-search" }
 
 [dev-dependencies]
 tempfile = "3"

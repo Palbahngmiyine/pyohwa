@@ -1,10 +1,17 @@
 [package]
 name = "pyohwa-cli"
-version = "0.1.0"
-edition = "2021"
+description = "CLI for Pyohwa — a zero-config static site generator built with Rust and Elm"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+homepage.workspace = true
+authors.workspace = true
+keywords = ["cli", "static-site-generator", "documentation", "vitepress"]
+categories = ["command-line-utilities"]
 
 [dependencies]
-pyohwa-core = { path = "../pyohwa-core" }
-pyohwa-server = { path = "../pyohwa-server" }
+pyohwa-core = { version = "0.1.0", path = "../pyohwa-core" }
+pyohwa-server = { version = "0.1.0", path = "../pyohwa-server" }
 clap = { version = "4", features = ["derive"] }
 tokio = { workspace = true }

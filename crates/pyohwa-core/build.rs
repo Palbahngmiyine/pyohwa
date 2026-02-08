@@ -7,16 +7,19 @@ fn main() {
     let out_dir = env::var("OUT_DIR").expect("OUT_DIR not set");
     let manifest_dir = env::var("CARGO_MANIFEST_DIR").expect("CARGO_MANIFEST_DIR not set");
     let project_root = Path::new(&manifest_dir).join("../.."); // workspace root
+    let pre_built_dir = Path::new(&manifest_dir).join("pre-built"); // crates.io fallback
 
     // Rerun if source assets change
     println!("cargo:rerun-if-changed=../../themes/default");
     println!("cargo:rerun-if-changed=../../elm/src");
     println!("cargo:rerun-if-changed=../../elm/elm.json");
+    println!("cargo:rerun-if-changed=pre-built");
 
     // --- Elm JS ---
     let elm_out = Path::new(&out_dir).join("elm.min.js");
     let elm_src = project_root.join("elm/src/Main.elm");
     let elm_dist = project_root.join("elm/dist/elm.min.js");
+    let elm_pre_built = pre_built_dir.join("elm.min.js");
 
     if elm_src.exists() {
         // Try to compile Elm from source
@@ -36,21 +39,22 @@ fn main() {
                 }
                 _ => {
                     println!("cargo:warning=Elm: compilation failed, using pre-built fallback");
-                    copy_elm_fallback(&elm_dist, &elm_out);
+                    copy_elm_fallback(&elm_pre_built, &elm_dist, &elm_out);
                 }
             }
         } else {
             println!("cargo:warning=Elm: compiler not found, using pre-built fallback");
-            copy_elm_fallback(&elm_dist, &elm_out);
+            copy_elm_fallback(&elm_pre_built, &elm_dist, &elm_out);
         }
     } else {
-        copy_elm_fallback(&elm_dist, &elm_out);
+        copy_elm_fallback(&elm_pre_built, &elm_dist, &elm_out);
     }
 
     // --- Theme CSS ---
     let theme_out = Path::new(&out_dir).join("theme.css");
     let theme_source = project_root.join("themes/default/theme.css");
     let theme_dist = project_root.join("themes/default/dist/theme.css");
+    let theme_pre_built = pre_built_dir.join("theme.css");
 
     // Try Tailwind CLI if available
     if theme_source.exists() {
@@ -81,8 +85,10 @@ fn main() {
         }
     }
 
-    // Fallback: copy pre-built CSS
-    if theme_dist.exists() {
+    // Fallback: crate-internal pre-built → workspace dist → source → placeholder
+    if theme_pre_built.exists() {
+        fs::copy(&theme_pre_built, &theme_out).expect("Failed to copy pre-built theme.css");
+    } else if theme_dist.exists() {
         fs::copy(&theme_dist, &theme_out).expect("Failed to copy theme.css");
     } else if theme_source.exists() {
         fs::copy(&theme_source, &theme_out).expect("Failed to copy theme source");
@@ -91,8 +97,11 @@ fn main() {
     }
 }
 
-fn copy_elm_fallback(elm_dist: &Path, elm_out: &Path) {
-    if elm_dist.exists() {
+/// Fallback order: crate-internal pre-built → workspace dist → placeholder
+fn copy_elm_fallback(elm_pre_built: &Path, elm_dist: &Path, elm_out: &Path) {
+    if elm_pre_built.exists() {
+        fs::copy(elm_pre_built, elm_out).expect("Failed to copy pre-built elm.min.js");
+    } else if elm_dist.exists() {
         fs::copy(elm_dist, elm_out).expect("Failed to copy elm.min.js");
     } else {
         fs::write(
