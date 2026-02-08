@@ -57,6 +57,26 @@ pub fn render_page(
             node: document.getElementById('app'),
             flags: window.__PYOHWA_DATA__
         }});
+        if (app.ports) {{
+            if (app.ports.scrollToElement) {{
+                app.ports.scrollToElement.subscribe(function(id) {{
+                    var el = document.getElementById(id);
+                    if (el) {{ el.scrollIntoView({{ behavior: 'smooth', block: 'start' }}); }}
+                }});
+            }}
+            if (app.ports.onScroll) {{
+                var ticking = false;
+                window.addEventListener('scroll', function() {{
+                    if (!ticking) {{
+                        window.requestAnimationFrame(function() {{
+                            app.ports.onScroll.send(window.scrollY);
+                            ticking = false;
+                        }});
+                        ticking = true;
+                    }}
+                }});
+            }}
+        }}
     }}
     </script>
 </body>
@@ -141,12 +161,32 @@ fn build_pyohwa_data(
         })
         .collect();
 
-    let data = json!({
+    let layout_str = match &page.frontmatter.layout {
+        crate::content::frontmatter::Layout::Doc => "doc",
+        crate::content::frontmatter::Layout::Home => "home",
+        crate::content::frontmatter::Layout::Page => "page",
+        crate::content::frontmatter::Layout::Custom(s) => s.as_str(),
+    };
+
+    let prev_link = page.prev.as_ref().and_then(|route| {
+        find_page_title(site_graph, route.path()).map(|title| {
+            json!({ "title": title, "link": route.path() })
+        })
+    });
+
+    let next_link = page.next.as_ref().and_then(|route| {
+        find_page_title(site_graph, route.path()).map(|title| {
+            json!({ "title": title, "link": route.path() })
+        })
+    });
+
+    let mut data = json!({
         "page": {
             "title": page.frontmatter.title,
             "description": page.frontmatter.description.as_deref().unwrap_or(""),
             "content": page.html,
             "toc": toc_items,
+            "layout": layout_str,
             "frontmatter": {}
         },
         "site": {
@@ -161,7 +201,32 @@ fn build_pyohwa_data(
         }
     });
 
+    if let Some(prev) = prev_link {
+        data["prev"] = prev;
+    }
+    if let Some(next) = next_link {
+        data["next"] = next;
+    }
+
     serde_json::to_string(&data).map_err(RenderError::Serialization)
+}
+
+/// Find a page's title by its route path from the site graph
+fn find_page_title(site_graph: &SiteGraph, path: &str) -> Option<String> {
+    // First check sidebar items (they have display titles)
+    for group in &site_graph.sidebar {
+        for item in &group.items {
+            if item.link == path {
+                return Some(item.text.clone());
+            }
+        }
+    }
+    // Fallback: check pages directly
+    site_graph
+        .pages
+        .iter()
+        .find(|p| p.route.path() == path)
+        .map(|p| p.frontmatter.title.clone())
 }
 
 fn escape_html(s: &str) -> String {
