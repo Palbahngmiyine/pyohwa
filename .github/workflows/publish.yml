@@ -18,12 +18,6 @@ jobs:
           cp elm/dist/elm.min.js crates/pyohwa-core/pre-built/elm.min.js
           cp themes/default/dist/theme.css crates/pyohwa-core/pre-built/theme.css
 
-      - name: Verify all crates can be packaged
-        run: |
-          cargo package -p pyohwa-search --allow-dirty
-          cargo package -p pyohwa-core --allow-dirty
-          echo "Packaging verified successfully"
-
       - name: Publish pyohwa-search
         run: |
           if cargo publish -p pyohwa-search --allow-dirty 2>&1 | tee /dev/stderr | grep -q "already exists"; then
