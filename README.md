@@ -34,7 +34,7 @@ Open [http://localhost:3000](http://localhost:3000) to see your site.
 ### From source
 
 ```bash
-git clone https://github.com/piatoss3612/pyohwa.git
+git clone https://github.com/Palbahngmiyine/pyohwa.git
 cd pyohwa
 cargo build --release
 
